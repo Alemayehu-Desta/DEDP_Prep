@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MIT DEDP — Math Prep Schedule</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f7f5f0;--surface:#fff;--surface2:#f0ede6;--border:#e2ddd4;--border2:#ccc8be;--text:#1a1916;--text2:#6b6760;--text3:#9e9b95;--radius:10px;--radius-lg:16px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.app{display:grid;grid-template-columns:268px 1fr;min-height:100vh}
+.sidebar{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sidebar-header{padding:24px 20px 18px;border-bottom:1px solid var(--border)}
+.logo{font-family:'DM Serif Display',serif;font-size:19px;color:var(--text);line-height:1.2;margin-bottom:3px}
+.tagline{font-size:10px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;font-family:'DM Mono',monospace}
+.progress-ring-wrap{padding:20px;display:flex;flex-direction:column;align-items:center;border-bottom:1px solid var(--border)}
+.ring-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;font-family:'DM Mono',monospace;margin-bottom:12px}
+.ring-container{position:relative;width:90px;height:90px;margin-bottom:8px}
+.ring-container svg{transform:rotate(-90deg)}
+.ring-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-pct{font-size:20px;font-weight:600;color:var(--text)}
+.ring-sub{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace}
+.ring-stats{display:flex;gap:16px}
+.rs-val{font-size:14px;font-weight:600;color:var(--text);text-align:center}
+.rs-key{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;text-align:center}
+.nav{padding:10px;flex:1}
+.nav-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;font-family:'DM Mono',monospace;padding:0 8px;margin-bottom:4px;margin-top:10px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--radius);cursor:pointer;transition:background .12s;user-select:none}
+.nav-item:hover{background:var(--surface2)}
+.nav-item.active{background:var(--text)}
+.nav-item.active .nav-item-name{color:#fff}
+.nav-item.active .nav-item-meta{color:rgba(255,255,255,.55)}
+.nav-item.active .nav-mini-bar{background:rgba(255,255,255,.2)}
+.nav-item.active .nav-mini-fill{background:rgba(255,255,255,.8)!important}
+.nav-phase-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.nav-item-text{flex:1;min-width:0}
+.nav-item-name{font-size:12.5px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-item-meta{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace}
+.nav-mini-bar{height:3px;background:var(--border);border-radius:2px;margin-top:3px;overflow:hidden}
+.nav-mini-fill{height:100%;border-radius:2px;transition:width .4s}
+.sidebar-footer{padding:14px;border-top:1px solid var(--border)}
+.reset-btn{width:100%;padding:7px;font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);background:none;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer;transition:all .12s}
+.reset-btn:hover{border-color:var(--border2);color:var(--text2);background:var(--surface2)}
+.main{overflow-y:auto}
+.main-inner{max-width:820px;padding:36px 44px 60px}
+.phase-hero{margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--border)}
+.phase-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px 4px 8px;border-radius:20px;font-size:11px;font-family:'DM Mono',monospace;letter-spacing:.04em;margin-bottom:12px;border:1px solid}
+.phase-badge .dot{width:6px;height:6px;border-radius:50%}
+.phase-title{font-family:'DM Serif Display',serif;font-size:30px;color:var(--text);line-height:1.2;margin-bottom:7px}
+.phase-subtitle{font-size:13.5px;color:var(--text2);line-height:1.65;max-width:560px}
+.phase-meta{display:flex;gap:20px;margin-top:14px;flex-wrap:wrap}
+.meta-item{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text3);font-family:'DM Mono',monospace}
+.meta-dot{width:4px;height:4px;border-radius:50%;background:var(--text3)}
+.progress-bar-wrap{margin-bottom:28px}
+.pb-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.pb-label{font-size:12px;font-weight:500;color:var(--text2)}
+.pb-pct{font-size:12px;font-family:'DM Mono',monospace;color:var(--text2)}
+.pb-track{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.pb-fill{height:100%;border-radius:3px;transition:width .4s cubic-bezier(.4,0,.2,1)}
+.section-title{font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);font-family:'DM Mono',monospace;margin-bottom:14px;margin-top:28px}
+.topics-list{display:flex;flex-direction:column;gap:10px;margin-bottom:6px}
+.topic-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:border-color .12s}
+.topic-card:hover{border-color:var(--border2)}
+.topic-header{display:flex;align-items:center;gap:11px;padding:14px 18px;cursor:pointer}
+.topic-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;font-family:'DM Serif Display',serif}
+.topic-info{flex:1;min-width:0}
+.topic-name{font-size:13.5px;font-weight:500;color:var(--text)}
+.topic-why{font-size:11.5px;color:var(--text3);margin-top:2px;line-height:1.4}
+.topic-check-count{font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);flex-shrink:0}
+.topic-chevron{color:var(--text3);font-size:13px;transition:transform .2s;flex-shrink:0}
+.topic-card.open .topic-chevron{transform:rotate(180deg)}
+.topic-items{padding:0 18px 14px;border-top:1px solid var(--border);display:none}
+.topic-card.open .topic-items{display:block}
+.checklist{list-style:none;padding-top:10px;display:flex;flex-direction:column;gap:5px}
+.checklist-item label{display:flex;align-items:flex-start;gap:9px;cursor:pointer;width:100%}
+.checklist-item input[type="checkbox"]{width:15px;height:15px;margin-top:2px;flex-shrink:0;accent-color:var(--text);cursor:pointer}
+.checklist-item span{font-size:12.5px;color:var(--text2);line-height:1.5;transition:color .12s}
+.checklist-item input:checked+span{color:var(--text3);text-decoration:line-through}
+.resources-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:9px}
+.resource-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:flex-start;gap:10px;transition:border-color .12s,background .12s}
+.resource-card:hover{border-color:var(--border2);background:var(--surface2)}
+.res-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.res-name{font-size:12px;font-weight:500;color:var(--text);line-height:1.3;margin-bottom:2px}
+.res-type{font-size:10.5px;color:var(--text3);font-family:'DM Mono',monospace}
+.weekly-grid{display:flex;flex-direction:column;gap:5px}
+.week-row{display:grid;grid-template-columns:100px 1fr 65px;align-items:center;gap:12px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)}
+.week-row:hover{border-color:var(--border2)}
+.wr-day{font-size:10.5px;font-family:'DM Mono',monospace;color:var(--text3);font-weight:500}
+.wr-task{font-size:12.5px;color:var(--text2)}
+.wr-hrs{font-size:11px;font-family:'DM Mono',monospace;color:var(--text3);text-align:right;white-space:nowrap}
+.tip-box{border-left:3px solid;padding:13px 16px;border-radius:0 var(--radius) var(--radius) 0;margin-top:22px}
+.tip-box p{font-size:12.5px;line-height:1.7}
+.tip-label{font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:3px}
+.alert-box{border:1px solid;border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:24px}
+.alert-box .al-title{font-size:13px;font-weight:600;margin-bottom:6px}
+.alert-box .al-body{font-size:12.5px;line-height:1.7}
+.overview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:28px}
+.overview-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;cursor:pointer;transition:all .15s}
+.overview-card:hover{border-color:var(--border2);transform:translateY(-1px)}
+.ov-phase{font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px;font-weight:500}
+.ov-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px}
+.ov-months{font-size:10.5px;color:var(--text3);margin-bottom:12px;font-family:'DM Mono',monospace}
+.ov-bar{height:4px;border-radius:3px;background:var(--border);overflow:hidden;margin-bottom:6px}
+.ov-fill{height:100%;border-radius:3px;transition:width .5s}
+.ov-pct{font-size:10.5px;font-family:'DM Mono',monospace}
+.timeline-strip{display:flex;gap:0;margin-bottom:28px;border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.tl-seg{flex:1;padding:12px 14px;cursor:pointer;transition:background .12s;border-right:1px solid var(--border)}
+.tl-seg:last-child{border-right:none}
+.tl-seg:hover{background:var(--surface2)}
+.tl-seg.active-seg{background:var(--text)}
+.ts-months{font-size:10px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.ts-name{font-size:12.5px;font-weight:500}
+.tl-seg:not(.active-seg) .ts-months{color:var(--text3)}
+.tl-seg:not(.active-seg) .ts-name{color:var(--text)}
+.tl-seg.active-seg .ts-months{color:rgba(255,255,255,.5)}
+.tl-seg.active-seg .ts-name{color:#fff}
+@media(max-width:768px){.app{grid-template-columns:1fr}.sidebar{position:static;height:auto}.main-inner{padding:20px 16px 40px}.timeline-strip{flex-direction:column}.tl-seg{border-right:none;border-bottom:1px solid var(--border)}.tl-seg:last-child{border-bottom:none}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">DEDP Prep<br>Tracker</div>
+    <div class="tagline">MIT · Jan 2027 Start</div>
+  </div>
+  <div class="progress-ring-wrap">
+    <div class="ring-label">Overall progress</div>
+    <div class="ring-container">
+      <svg width="90" height="90" viewBox="0 0 90 90">
+        <circle cx="45" cy="45" r="38" fill="none" stroke="#e2ddd4" stroke-width="7"/>
+        <circle cx="45" cy="45" r="38" fill="none" stroke="#1a1916" stroke-width="7" stroke-linecap="round"
+          stroke-dasharray="238.8" stroke-dashoffset="238.8" id="ring-progress"/>
+      </svg>
+      <div class="ring-text"><span class="ring-pct" id="ring-pct-text">0%</span><span class="ring-sub">done</span></div>
+    </div>
+    <div class="ring-stats">
+      <div><div class="rs-val" id="stat-done">0</div><div class="rs-key">done</div></div>
+      <div><div class="rs-val" id="stat-total">0</div><div class="rs-key">total</div></div>
+      <div><div class="rs-val" id="stat-wks">0</div><div class="rs-key">weeks</div></div>
+    </div>
+  </div>
+  <nav class="nav">
+    <div class="nav-label">Navigate</div>
+    <div class="nav-item active" onclick="showPage('overview')" id="nav-overview">
+      <div class="nav-phase-dot" style="background:#888"></div>
+      <div class="nav-item-text">
+        <div class="nav-item-name">Overview</div>
+        <div class="nav-item-meta">All 5 phases</div>
+      </div>
+    </div>
+    <div class="nav-label">Phases</div>
+    <div id="sidebar-nav"></div>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="reset-btn" onclick="resetProgress()">↺ Reset all progress</button>
+  </div>
+</aside>
+<main class="main">
+  <div class="main-inner" id="main-content"></div>
+</main>
+</div>
+<script>
+const PHASES=[
+{
+  id:'p0',num:0,
+  name:'Pre-Foundation',months:'Mar – Apr 2026',hrs:8,durationWeeks:8,
+  color:'#c0392b',colorBg:'#fdf0ee',colorBorder:'#f5b7b1',
+  subtitle:'10+ years away from math means starting here — not at calculus. This phase rebuilds arithmetic fluency, algebra confidence, and the number sense that everything else depends on. Do not skip this.',
+  alert:{title:'Why this phase exists for you',body:'MIT\'s own calculus course lists "high school algebra and trigonometry" as its only prerequisite. After a 10-year gap, those muscles need rebuilding before any calculus will stick. This phase is your runway — 8 weeks of focused work that will make every subsequent phase significantly faster and more effective.',color:'#c0392b',bg:'#fdf0ee',border:'#f5b7b1'},
+  topics:[
+    {
+      name:'Arithmetic & number sense',
+      icon:'#',
+      why:'The invisible foundation. Gaps here cause errors in every downstream calculation — from probability to regression.',
+      items:['Fractions: add, subtract, multiply, divide — by hand without a calculator','Percentages and ratios (essential for interpreting regression outputs and policy data)','Negative numbers and absolute value','Powers and roots: meaning of x², x³, √x, xⁿ','Order of operations (PEMDAS) — applied to multi-step expressions','Scientific notation — reading large/small numbers in datasets']
+    },
+    {
+      name:'Algebra I — core mechanics',
+      icon:'x',
+      why:'Used in every DEDP equation. You will solve for unknowns in estimator derivations, probability problems, and optimization.',
+      items:['Solving linear equations in one variable: 3x + 7 = 22','Solving systems of two equations (substitution and elimination)','Inequalities: solving and interpreting on a number line','Translating word problems into equations — critical for policy context','Factoring: common factors, difference of squares, quadratics','The quadratic formula and when to use it']
+    },
+    {
+      name:'Algebra II — functions & graphs',
+      icon:'f(x)',
+      why:'Functions are the language of economics. Demand curves, utility functions, and regression lines are all functions.',
+      items:['What a function is: domain, range, input → output','Graphing linear functions: slope, y-intercept, x-intercept','Slope as rate of change — the intuition behind derivatives','Quadratic functions and their parabola shapes','Exponential functions: y = aˣ — growth and decay (GDP, compounding)','Logarithms: ln(x) and log(x) — used constantly in econometrics (log-linear models)']
+    },
+    {
+      name:'Algebra III — working with expressions',
+      icon:'Σ',
+      why:'Algebraic manipulation is the core skill in every DEDP derivation — you rearrange formulas constantly.',
+      items:['Expanding brackets and simplifying expressions','Sigma notation (Σ): reading and evaluating sums — used in every estimator formula','Manipulating fractions with variables','Completing the square','Polynomial long division (occasional use)','Reading and interpreting mathematical notation in economics papers']
+    },
+    {
+      name:'Geometry & trigonometry basics',
+      icon:'△',
+      why:'Light trig is needed for calculus prerequisites. Geometry builds spatial intuition for graphs and distributions.',
+      items:['Coordinate plane: plotting points, measuring distances','Slope of a line between two points: (y₂−y₁)/(x₂−x₁)','Basic geometry: area, perimeter, angles — useful for integration as area under curves','Sine, cosine, tangent — definitions and the unit circle','Key trig values: sin(0), sin(π/2), cos(0), cos(π) — used in Fourier-adjacent topics','Radian vs degree conversion']
+    }
+  ],
+  resources:[
+    {icon:'▶',name:'Khan Academy — Algebra I & II (full course)',type:'Free · Adaptive · Best starting point after 10-year gap'},
+    {icon:'▶',name:'Khan Academy — Pre-calculus',type:'Free · Includes functions, logs, trig'},
+    {icon:'≡',name:'No-Bullshit Guide to Math & Physics — Ivan Savov',type:'Book · Rapid rebuilding for adults returning to math'},
+    {icon:'▶',name:'3Blue1Brown — Lockdown Math series',type:'YouTube · Free · Algebra intuition for adults'},
+    {icon:'≡',name:'Art of Problem Solving — Algebra textbook',type:'Book · Rigorous but clear — used for competition prep'},
+    {icon:'≡',name:'Schaum\'s Outline of Precalculus',type:'Book · Hundreds of worked examples — drill-focused'}
+  ],
+  weekly:[
+    {day:'Mon',task:'Khan Academy lesson (1 topic) + 20 practice problems',hrs:'1.5 hrs'},
+    {day:'Tue',task:'Rework any incorrect problems from Monday by hand',hrs:'1 hr'},
+    {day:'Wed',task:'New topic: functions or logs — with graphing',hrs:'1.5 hrs'},
+    {day:'Thu',task:'Mixed problem set combining the week\'s topics',hrs:'1.5 hrs'},
+    {day:'Fri',task:'One Khan Academy unit test (timed)',hrs:'1 hr'},
+    {day:'Weekend',task:'Review errors + work 1 chapter from Savov book',hrs:'1.5 hrs'}
+  ],
+  tip:'Do every Khan Academy problem by hand on paper — not in your head, not on a calculator. The physical act of writing algebraic steps rebuilds the procedural memory that 10 years of disuse has dimmed. Speed comes later; accuracy and process come first.'
+},
+{
+  id:'p1',num:1,
+  name:'Calculus',months:'May – Jun 2026',hrs:10,durationWeeks:8,
+  color:'#1a4fd6',colorBg:'#eef2fd',colorBorder:'#b8cbf7',
+  subtitle:'Build the mathematical bedrock before probability begins. Calculus, linear algebra, and optimization are used throughout every DEDP course. With Phase 0 complete, this phase will feel manageable rather than overwhelming.',
+  topics:[
+    {
+      name:'Limits & continuity',
+      icon:'lim',
+      why:'The conceptual foundation of calculus. Derivatives and integrals are both defined as limits.',
+      items:['Intuition of a limit: what a function approaches as x → a','One-sided limits and when limits do not exist','Limit laws: sum, product, quotient rules for limits','Continuity: what it means and why it matters','L\'Hôpital\'s rule for 0/0 and ∞/∞ indeterminate forms','Limits at infinity — behavior of functions as x → ∞']
+    },
+    {
+      name:'Derivatives',
+      icon:'d/dx',
+      why:'Derivatives measure rates of change — the core of marginal analysis and optimization in economics.',
+      items:['Definition as limit of a difference quotient','Power rule, constant rule, sum rule','Product rule and quotient rule','Chain rule — essential for composite functions','Derivatives of eˣ, ln(x), sin(x), cos(x)','Higher-order derivatives: f\'\'(x) and economic interpretation']
+    },
+    {
+      name:'Optimization',
+      icon:'max',
+      why:'Every economic model involves optimization — utility maximization, cost minimization, OLS minimizes squared residuals.',
+      items:['Critical points: setting f\'(x) = 0 and solving','First derivative test: identify maxima and minima','Second derivative test: concavity and inflection points','Optimization on a closed interval','Partial derivatives: ∂f/∂x holding other variables fixed','Lagrangian optimization with one constraint: L = f(x,y) − λ(g(x,y)−c)']
+    },
+    {
+      name:'Integration',
+      icon:'∫',
+      why:'Integration computes areas, cumulative probabilities (CDF from PDF), and expected values — all used in DEDP probability.',
+      items:['Antiderivatives and indefinite integrals','Fundamental Theorem of Calculus — parts I and II','Definite integrals as area under a curve','Integration by substitution (u-substitution)','Integration by parts: ∫u dv = uv − ∫v du','Improper integrals — needed for continuous probability distributions']
+    },
+    {
+      name:'Multivariable calculus',
+      icon:'∂²',
+      why:'Multivariate regression and structural economic models require comfort with functions of multiple variables.',
+      items:['Functions of two variables: z = f(x,y) — reading and graphing','Partial derivatives: ∂f/∂x and ∂f/∂y','The gradient vector ∇f and its geometric meaning','Total differential: df = (∂f/∂x)dx + (∂f/∂y)dy','Unconstrained optimization in two variables','Bordered Hessian for constrained optimization']
+    },
+    {
+      name:'Linear algebra',
+      icon:'Ax',
+      why:'The backbone of OLS regression — every estimator is a matrix operation. The formula β̂ = (X\'X)⁻¹X\'y is pure linear algebra.',
+      items:['Vectors: addition, scalar multiplication, dot product','Matrices: addition, multiplication, transposition','Determinants — 2×2 and 3×3 by hand','Matrix inverse: when it exists and how to find it','Solving linear systems with matrices (row reduction)','Eigenvalues and eigenvectors — intuition and computation','Matrix form of OLS: derive β̂ = (X\'X)⁻¹X\'y step by step']
+    }
+  ],
+  resources:[
+    {icon:'▶',name:'3Blue1Brown — Essence of Calculus',type:'YouTube · Free · 12 videos — best visual intuition'},
+    {icon:'▶',name:'3Blue1Brown — Essence of Linear Algebra',type:'YouTube · Free · 16 videos'},
+    {icon:'≡',name:'Mathematics for Economists — Simon & Blume',type:'Textbook · Gold standard for DEDP prep'},
+    {icon:'≡',name:'Khan Academy — AP Calculus AB + BC',type:'Free · Structured problem sets with hints'},
+    {icon:'≡',name:'MIT OCW 18.01SC Single Variable Calculus',type:'MIT OpenCourseWare · Free lecture notes + psets'},
+    {icon:'≡',name:'MIT OCW 18.02SC Multivariable Calculus',type:'MIT OpenCourseWare · Free'}
+  ],
+  weekly:[
+    {day:'Mon / Tue',task:'New concept lecture (OCW or 3Blue1Brown) + notes',hrs:'2 hrs'},
+    {day:'Wed / Thu',task:'Problem sets from Simon & Blume',hrs:'3 hrs'},
+    {day:'Friday',task:'Review errors + rework weak problems by hand',hrs:'2 hrs'},
+    {day:'Weekend',task:'Khan Academy practice + 1 applied economics example',hrs:'3 hrs'}
+  ],
+  tip:'Simon & Blume\'s Mathematics for Economists is the single best book for DEDP prep — it covers calculus, linear algebra, and optimization with economics framing throughout. Prioritize it. Work every problem: the answer key is available online.'
+},
+{
+  id:'p2',num:2,
+  name:'Probability & Stats',months:'Jul – Aug 2026',hrs:12,durationWeeks:8,
+  color:'#1a7a4a',colorBg:'#e8f5ee',colorBorder:'#a3d9bc',
+  subtitle:'Master probability theory and statistical inference to match the prerequisites of MIT 14.310x — the core DEDP data course taught by Esther Duflo and Sara Ellison.',
+  topics:[
+    {
+      name:'Probability theory',
+      icon:'P',
+      why:'The entire first half of 14.310x is probability. Without this foundation, the course becomes extremely difficult.',
+      items:['Sample spaces, events, and axioms of probability','Complement, union, intersection — Venn diagram reasoning','Conditional probability: P(A|B) = P(A∩B)/P(B)','Bayes\' theorem — and why it matters for causal inference','Independence vs. correlation — a crucial distinction','Random variables: discrete and continuous','PMF, PDF, CDF — how to compute and interpret each','Expectation E[X], variance Var(X), standard deviation']
+    },
+    {
+      name:'Joint distributions & key results',
+      icon:'f(x,y)',
+      why:'DEDP regression depends on understanding how variables relate probabilistically — covariance, correlation, and joint behavior.',
+      items:['Joint PMF and joint PDF — reading and computing','Marginal and conditional distributions','Covariance: Cov(X,Y) = E[XY] − E[X]E[Y]','Correlation coefficient ρ = Cov(X,Y)/(σ_X σ_Y)','Independence in terms of joint distributions','Law of Total Expectation: E[X] = E[E[X|Y]]','Law of Total Variance']
+    },
+    {
+      name:'Special distributions',
+      icon:'~',
+      why:'DEDP uses Normal, Binomial, Poisson, and t-distributions extensively throughout estimation and hypothesis testing.',
+      items:['Bernoulli and Binomial distributions','Poisson distribution — count data in policy research','Uniform distribution — used in simulation and proofs','Exponential distribution','Normal distribution — Z-scores, standard normal table','Chi-squared, t, and F distributions — the testing trio','Central Limit Theorem: statement, intuition, and proof sketch','Law of Large Numbers']
+    },
+    {
+      name:'Statistical inference',
+      icon:'θ̂',
+      why:'Core of DEDP: drawing conclusions about populations from sample data — the foundation of all empirical work.',
+      items:['Populations vs. samples — the fundamental distinction','Point estimation: method of moments and MLE','Properties of estimators: unbiasedness, consistency, efficiency','Confidence intervals: construction and correct interpretation','Hypothesis testing: null vs. alternative hypothesis','p-values: what they mean and what they do not mean','t-tests: one-sample, two-sample, paired','F-test for joint significance','Type I and Type II errors, and statistical power']
+    }
+  ],
+  resources:[
+    {icon:'≡',name:'MIT 6.431x — Probability (MITx Online)',type:'MITx · Free to audit · Rigorous treatment'},
+    {icon:'≡',name:'Probability & Statistics — DeGroot & Schervish',type:'Textbook · Recommended by 14.310x syllabus'},
+    {icon:'≡',name:'Intro to Math Statistics — Larsen & Marx',type:'Textbook · Easier + more intuitive entry point'},
+    {icon:'▶',name:'StatQuest with Josh Starmer',type:'YouTube · Free · Best visual intuition for stats'},
+    {icon:'≡',name:'MIT OCW 14.310x lecture notes (free)',type:'OpenCourseWare · Direct course content'}
+  ],
+  weekly:[
+    {day:'Mon / Tue',task:'6.431x lecture + notes (2 units per week)',hrs:'3 hrs'},
+    {day:'Wednesday',task:'DeGroot & Schervish parallel reading chapter',hrs:'2 hrs'},
+    {day:'Thursday',task:'Problem sets: distributions and inference',hrs:'2.5 hrs'},
+    {day:'Friday',task:'StatQuest video for intuition check',hrs:'1.5 hrs'},
+    {day:'Weekend',task:'OCW 14.310x early problem sets',hrs:'3 hrs'}
+  ],
+  tip:'Do not skip the Central Limit Theorem. DEDP leans on it constantly — in regression asymptotics, in RCT analysis, and in causal inference. Make sure you can both derive it and explain it intuitively to someone else without notes.'
+},
+{
+  id:'p3',num:3,
+  name:'Econometrics',months:'Sep – Oct 2026',hrs:12,durationWeeks:8,
+  color:'#a05c00',colorBg:'#fdf3e3',colorBorder:'#f5c97a',
+  subtitle:'Get fluent in regression analysis and causal inference before arriving at MIT. This is the intellectual soul of DEDP — how J-PAL thinks about evidence and policy.',
+  topics:[
+    {
+      name:'OLS regression',
+      icon:'β',
+      why:'The workhorse of all DEDP empirical work. You will use this in every applied module and your capstone.',
+      items:['Simple linear regression: Y = β₀ + β₁X + ε','Interpretation of coefficients — in levels and in logs','Multiple regression: Y = β₀ + β₁X₁ + β₂X₂ + ... + ε','Matrix form of OLS: derive β̂ = (X\'X)⁻¹X\'y from scratch','Gauss-Markov assumptions — what each means in practice','Gauss-Markov theorem: OLS is BLUE when assumptions hold','Heteroskedasticity: detection and robust standard errors','Model fit: R², adjusted R², F-test for joint significance']
+    },
+    {
+      name:'Causal inference & RCTs',
+      icon:'τ',
+      why:'J-PAL and DEDP are built on randomized evaluations. This is the intellectual core of the entire program.',
+      items:['Correlation vs. causation — the fundamental distinction','Potential outcomes framework (Rubin causal model): Y(1), Y(0)','Average treatment effect (ATE) = E[Y(1) − Y(0)]','Why randomization identifies the ATE','Intention-to-treat (ITT) analysis','Compliance and LATE (Local Average Treatment Effect)','Difference-in-differences (DiD) design','Parallel trends assumption — testing and defending it']
+    },
+    {
+      name:'Advanced causal methods',
+      icon:'IV',
+      why:'Used in DEDP electives and capstone — real policy datasets require these tools.',
+      items:['Instrumental variables: logic, relevance, and exclusion restriction','Two-Stage Least Squares (2SLS) — mechanics and interpretation','Panel data: fixed effects and random effects','Hausman test: when to use FE vs. RE','Probit and logit — binary outcome models','Regression discontinuity design (RDD): sharp and fuzzy','Nonparametric regression and local linear methods','Matching methods: propensity score matching']
+    }
+  ],
+  resources:[
+    {icon:'≡',name:'Introductory Econometrics — Wooldridge',type:'Textbook · Standard reference recommended by 14.310x'},
+    {icon:'≡',name:'Mostly Harmless Econometrics — Angrist & Pischke',type:'Textbook · Causal inference bible · Essential for DEDP'},
+    {icon:'≡',name:'Running Randomized Evaluations — Glennerster',type:'Book · Written by a DEDP co-instructor'},
+    {icon:'≡',name:'MIT OCW 14.32 Econometrics',type:'OpenCourseWare · Free · MIT-level problem sets'},
+    {icon:'▶',name:'Nick Huntington-Klein — The Effect (YouTube + book)',type:'Free · Best causal inference explainer available'}
+  ],
+  weekly:[
+    {day:'Mon / Tue',task:'Wooldridge chapter + derivations by hand',hrs:'3 hrs'},
+    {day:'Wednesday',task:'Mostly Harmless Econometrics — 1 chapter',hrs:'2 hrs'},
+    {day:'Thursday',task:'OCW 14.32 problem set',hrs:'2.5 hrs'},
+    {day:'Friday',task:'Replicate a J-PAL paper\'s main regression in R',hrs:'2 hrs'},
+    {day:'Weekend',task:'RCT design — JPAL102x problem sets',hrs:'2.5 hrs'}
+  ],
+  tip:'Read Mostly Harmless Econometrics cover to cover. Angrist is an MIT professor and Nobel laureate — his framing is exactly how DEDP faculty think about causality. This book alone will make your first semester significantly easier than classmates who skipped it.'
+},
+{
+  id:'p4',num:4,
+  name:'Integration & Drills',months:'Nov 2026 – Jan 2027',hrs:10,durationWeeks:10,
+  color:'#5c3aab',colorBg:'#f0ebfc',colorBorder:'#c9b8f0',
+  subtitle:'Synthesize everything into fluency. Practice under exam conditions. Get R-proficient. Audit the actual 14.310x course before you arrive on campus.',
+  topics:[
+    {
+      name:'R for econometrics',
+      icon:'R',
+      why:'14.310x uses R for all empirical work. You need to be comfortable before arriving — not learning basics in class.',
+      items:['Installing R and RStudio, basic navigation','Data types in R: vectors, data frames, lists','Data wrangling: dplyr, tidyverse, readr — import and clean data','OLS regression: lm() function, reading summary() output','Robust standard errors: sandwich and lmtest packages','Visualization: ggplot2 for publication-quality plots','RCT analysis: balance tables, ATE estimation','Panel data: plm package for fixed effects models','Exporting results to tables: stargazer package']
+    },
+    {
+      name:'Full review & integration',
+      icon:'∑',
+      why:'Synthesize all 5 phases into coherent working knowledge before day one at MIT.',
+      items:['Rederive OLS from scratch using calculus and linear algebra (no notes)','Reconstruct a full RCT analysis pipeline in R end-to-end','Solve past 14.310x problem sets under timed exam conditions','Review microeconomics: utility, demand, equilibrium, game theory basics','Read 2 J-PAL evaluations and fully reproduce their empirical approach in writing','Explain the Central Limit Theorem and Gauss-Markov theorem verbally to someone']
+    },
+    {
+      name:'MIT-specific preparation',
+      icon:'⌖',
+      why:'Targeted preparation for the exact courses, professors, and seminar culture you will encounter at MIT.',
+      items:['Audit 14.310x on MITx Online — January 2027 session (free)','Read Poor Economics by Banerjee & Duflo (your faculty directors)','Review your MicroMasters work — find and fix weak spots','Practice explaining methods verbally — DEDP has a seminar culture','Set up LaTeX for problem sets (Overleaf is free and browser-based)','Set up Python environment alongside R for DEDP data projects']
+    }
+  ],
+  resources:[
+    {icon:'≡',name:'R for Data Science — Hadley Wickham',type:'Free online · r4ds.hadley.nz · Start here for R'},
+    {icon:'≡',name:'14.310x on MITx Online (audit free)',type:'MIT · Exact course you will take on campus'},
+    {icon:'≡',name:'Poor Economics — Banerjee & Duflo',type:'Book · Written by your DEDP faculty directors'},
+    {icon:'≡',name:'J-PAL Research Library',type:'Free online · 1,000+ evaluations · Real data practice'},
+    {icon:'≡',name:'The Effect — Nick Huntington-Klein',type:'Free online · theeffectbook.net · R code throughout'}
+  ],
+  weekly:[
+    {day:'Mon / Tue',task:'R coding: replicate one published econometric result',hrs:'3 hrs'},
+    {day:'Wednesday',task:'Timed problem set — past 14.310x exams',hrs:'2 hrs'},
+    {day:'Thursday',task:'Read one J-PAL paper + summarize empirics in writing',hrs:'1.5 hrs'},
+    {day:'Friday',task:'Audit 14.310x MITx — watch and take notes on lectures',hrs:'2 hrs'},
+    {day:'Weekend',task:'Full review of the week\'s weakest topic',hrs:'2 hrs'}
+  ],
+  tip:'Audit the actual 14.310x course on MITx Online starting in January 2027. The residential semester starts the same month — having already seen the material once makes a dramatic difference. This single step may be the highest-leverage action in this entire guide.'
+}
+];
+
+let state={};
+function loadState(){
+  try{const s=localStorage.getItem('dedp_state_v2');if(s)state=JSON.parse(s);}catch(e){}
+  PHASES.forEach(ph=>ph.topics.forEach((t,ti)=>t.items.forEach((_,ii)=>{const k=`${ph.id}_${ti}_${ii}`;if(!(k in state))state[k]=false;})));
+}
+function saveState(){try{localStorage.setItem('dedp_state_v2',JSON.stringify(state));}catch(e){}}
+function toggle(key){state[key]=!state[key];saveState();updateProgress();}
+function resetProgress(){if(!confirm('Reset all progress?'))return;Object.keys(state).forEach(k=>state[k]=false);saveState();const p=document.querySelector('.nav-item.active')?.id?.replace('nav-','')??'overview';showPage(p);}
+function getPhaseProgress(ph){let done=0,total=0;ph.topics.forEach((t,ti)=>t.items.forEach((_,ii)=>{total++;if(state[`${ph.id}_${ti}_${ii}`])done++;}));return{done,total,pct:total?Math.round(done/total*100):0};}
+function getTotalProgress(){let done=0,total=0;PHASES.forEach(ph=>{const p=getPhaseProgress(ph);done+=p.done;total+=p.total;});return{done,total,pct:total?Math.round(done/total*100):0};}
+function updateProgress(){
+  const tot=getTotalProgress();
+  const circ=238.8,offset=circ-(tot.pct/100)*circ;
+  const ring=document.getElementById('ring-progress');if(ring)ring.setAttribute('stroke-dashoffset',offset.toFixed(1));
+  const pt=document.getElementById('ring-pct-text');if(pt)pt.textContent=tot.pct+'%';
+  const sd=document.getElementById('stat-done');if(sd)sd.textContent=tot.done;
+  const st=document.getElementById('stat-total');if(st)st.textContent=tot.total;
+  const sw=document.getElementById('stat-wks');if(sw)sw.textContent=PHASES.reduce((s,p)=>s+p.durationWeeks,0);
+  PHASES.forEach(ph=>{
+    const prog=getPhaseProgress(ph);
+    const nb=document.getElementById(`nav-bar-${ph.id}`);if(nb)nb.style.width=prog.pct+'%';
+    const nm=document.getElementById(`nav-meta-${ph.id}`);if(nm)nm.textContent=prog.pct+'% · '+ph.months.split(' ')[0];
+    const pb=document.getElementById(`pb-${ph.id}`);if(pb)pb.style.width=prog.pct+'%';
+    const pp=document.getElementById(`pbpct-${ph.id}`);if(pp)pp.textContent=prog.pct+'%';
+    const of=document.getElementById(`ov-fill-${ph.id}`);if(of)of.style.width=prog.pct+'%';
+    const op=document.getElementById(`ov-pct-${ph.id}`);if(op){op.textContent=prog.pct+'% complete';op.style.color=ph.color;}
+  });
+  document.querySelectorAll('.check-count').forEach(el=>{
+    const[phId,ti]=el.dataset.key.split('_');
+    const ph=PHASES.find(p=>p.id===phId);if(!ph)return;
+    const t=ph.topics[+ti];
+    let d=0;t.items.forEach((_,ii)=>{if(state[`${phId}_${ti}_${ii}`])d++;});
+    el.textContent=d+'/'+t.items.length;
+  });
+}
+function buildSidebarNav(){
+  document.getElementById('sidebar-nav').innerHTML=PHASES.map(ph=>`
+    <div class="nav-item" onclick="showPage('${ph.id}')" id="nav-${ph.id}">
+      <div class="nav-phase-dot" style="background:${ph.color}"></div>
+      <div class="nav-item-text">
+        <div class="nav-item-name">${ph.num===0?'Phase 0: ':'Phase '+ph.num+': '}${ph.name}</div>
+        <div class="nav-item-meta" id="nav-meta-${ph.id}">0% · ${ph.months.split(' ')[0]}</div>
+        <div class="nav-mini-bar"><div class="nav-mini-fill" id="nav-bar-${ph.id}" style="background:${ph.color};width:0%"></div></div>
+      </div>
+    </div>`).join('');
+}
+function showPage(id){
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  const n=document.getElementById('nav-'+id);if(n)n.classList.add('active');
+  const cont=document.getElementById('main-content');
+  if(id==='overview')renderOverview(cont);
+  else{const ph=PHASES.find(p=>p.id===id);if(ph)renderPhase(cont,ph);}
+  updateProgress();window.scrollTo&&window.scrollTo(0,0);
+}
+function renderOverview(cont){
+  const totalWks=PHASES.reduce((s,p)=>s+p.durationWeeks,0);
+  cont.innerHTML=`
+    <div style="margin-bottom:28px;padding-bottom:24px;border-bottom:1px solid var(--border)">
+      <h1 style="font-family:'DM Serif Display',serif;font-size:32px;margin-bottom:8px;line-height:1.2">MIT DEDP<br>Math Preparation</h1>
+      <p style="font-size:13.5px;color:var(--text2);line-height:1.7;max-width:520px">Your complete roadmap from March 2026 to January 2027. Starts from arithmetic and algebra fundamentals — then builds through calculus, probability, and econometrics to day-one readiness at MIT.</p>
+      <div style="display:flex;gap:18px;margin-top:14px;flex-wrap:wrap">
+        <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">● ${totalWks} weeks total</div>
+        <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">● 5 phases</div>
+        <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">● ${Object.keys(state).length} learning objectives</div>
+        <div style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">● Starts: arithmetic & algebra</div>
+      </div>
+    </div>
+    <div class="alert-box" style="background:#fdf0ee;border-color:#f5b7b1">
+      <div class="al-title" style="color:#c0392b">Start at Phase 0 — not Phase 1</div>
+      <div class="al-body" style="color:#922b21">After a 10-year math gap, jumping straight to calculus causes frustration and slow progress. Phase 0 spends 8 weeks rebuilding algebra and functions so that calculus in Phase 1 clicks rather than overwhelms. This investment pays back many times over in every later phase.</div>
+    </div>
+    <div class="overview-grid">
+      ${PHASES.map(ph=>{const prog=getPhaseProgress(ph);return`
+        <div class="overview-card" onclick="showPage('${ph.id}')">
+          <div class="ov-phase" style="color:${ph.color}">Phase ${ph.num}</div>
+          <div class="ov-name">${ph.name}</div>
+          <div class="ov-months">${ph.months}</div>
+          <div class="ov-bar"><div class="ov-fill" id="ov-fill-${ph.id}" style="background:${ph.color};width:${prog.pct}%"></div></div>
+          <div class="ov-pct" id="ov-pct-${ph.id}" style="font-size:10.5px;font-family:'DM Mono',monospace;color:${ph.color}">${prog.pct}% complete</div>
+        </div>`;}).join('')}
+    </div>
+    <div class="section-title">Full timeline</div>
+    <div class="timeline-strip">
+      ${PHASES.map(ph=>`<div class="tl-seg" onclick="showPage('${ph.id}')"><div class="ts-months">${ph.months.replace(' 2026','').replace(' 2026 –','–').replace('Nov – Jan 2027','Nov–Jan')}</div><div class="ts-name">Ph.${ph.num}: ${ph.name}</div></div>`).join('')}
+    </div>
+    <div class="section-title">Your action for today</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 22px">
+      <p style="font-size:13.5px;color:var(--text2);line-height:1.8">Go to <strong>khanacademy.org</strong> right now and take the Algebra I diagnostic test. It takes 20 minutes and will immediately tell you exactly which topics within Phase 0 need the most attention. Then open Phase 0 in this tracker and start checking off objectives as you master each one. Progress saves automatically in your browser.</p>
+    </div>`;
+}
+function renderPhase(cont,ph){
+  const prog=getPhaseProgress(ph);
+  cont.innerHTML=`
+    <div class="phase-hero">
+      <div class="phase-badge" style="background:${ph.colorBg};border-color:${ph.colorBorder};color:${ph.color}">
+        <div class="dot" style="background:${ph.color}"></div>Phase ${ph.num} · ${ph.months}
+      </div>
+      <h1 class="phase-title">${ph.name}</h1>
+      <p class="phase-subtitle">${ph.subtitle}</p>
+      <div class="phase-meta">
+        <div class="meta-item"><div class="meta-dot"></div>${ph.hrs} hrs/week</div>
+        <div class="meta-item"><div class="meta-dot"></div>${ph.durationWeeks} weeks</div>
+        <div class="meta-item"><div class="meta-dot"></div>${prog.done}/${prog.total} objectives done</div>
+      </div>
+    </div>
+    ${ph.alert?`<div class="alert-box" style="background:${ph.alert.bg};border-color:${ph.alert.border}"><div class="al-title" style="color:${ph.alert.color}">${ph.alert.title}</div><div class="al-body" style="color:${ph.alert.color};opacity:.85">${ph.alert.body}</div></div>`:''}
+    <div class="progress-bar-wrap">
+      <div class="pb-header"><span class="pb-label">Phase progress</span><span class="pb-pct" id="pbpct-${ph.id}">${prog.pct}%</span></div>
+      <div class="pb-track"><div class="pb-fill" id="pb-${ph.id}" style="background:${ph.color};width:${prog.pct}%"></div></div>
+    </div>
+    <div class="section-title">Topics &amp; learning objectives</div>
+    <div class="topics-list">
+      ${ph.topics.map((t,ti)=>{
+        let d=0;t.items.forEach((_,ii)=>{if(state[`${ph.id}_${ti}_${ii}`])d++;});
+        return`<div class="topic-card" id="tc-${ph.id}-${ti}">
+          <div class="topic-header" onclick="toggleCard('${ph.id}','${ti}')">
+            <div class="topic-icon" style="background:${ph.colorBg};color:${ph.color};font-family:'DM Serif Display',serif">${t.icon}</div>
+            <div class="topic-info">
+              <div class="topic-name">${t.name}</div>
+              <div class="topic-why">${t.why}</div>
+            </div>
+            <span class="topic-check-count check-count" data-key="${ph.id}_${ti}">${d}/${t.items.length}</span>
+            <span class="topic-chevron">▾</span>
+          </div>
+          <div class="topic-items">
+            <ul class="checklist">
+              ${t.items.map((item,ii)=>{const key=`${ph.id}_${ti}_${ii}`;return`<li class="checklist-item"><label><input type="checkbox" ${state[key]?'checked':''} onchange="toggle('${key}')"><span>${item}</span></label></li>`;}).join('')}
+            </ul>
+          </div>
+        </div>`;}).join('')}
+    </div>
+    <div class="section-title" style="margin-top:32px">Key resources</div>
+    <div class="resources-grid">
+      ${ph.resources.map(r=>`<div class="resource-card"><div class="res-icon" style="background:${ph.colorBg};color:${ph.color}">${r.icon}</div><div><div class="res-name">${r.name}</div><div class="res-type">${r.type}</div></div></div>`).join('')}
+    </div>
+    <div class="section-title" style="margin-top:32px">Weekly schedule</div>
+    <div class="weekly-grid">
+      ${ph.weekly.map(w=>`<div class="week-row"><span class="wr-day">${w.day}</span><span class="wr-task">${w.task}</span><span class="wr-hrs">${w.hrs}</span></div>`).join('')}
+    </div>
+    <div class="tip-box" style="border-color:${ph.color};background:${ph.colorBg};margin-bottom:48px">
+      <div class="tip-label" style="color:${ph.color}">Phase tip</div>
+      <p style="color:${ph.color}">${ph.tip}</p>
+    </div>`;
+}
+function toggleCard(phId,ti){const c=document.getElementById(`tc-${phId}-${ti}`);if(c)c.classList.toggle('open');}
+loadState();buildSidebarNav();showPage('overview');
+</script>
+</body>
+</html>
